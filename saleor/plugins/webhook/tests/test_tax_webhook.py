@@ -9,7 +9,7 @@ from ....core import EventDeliveryStatus
 from ....core.models import EventDelivery, EventPayload
 from ....core.taxes import TaxType
 from ....webhook.event_types import WebhookEventSyncType
-from ....webhook.payloads import generate_order_payload_without_taxes
+from ....webhook.payloads import generate_order_payload_for_tax_calculation
 from ..utils import DEFAULT_TAX_CODE, DEFAULT_TAX_DESCRIPTION, parse_tax_data
 
 
@@ -54,7 +54,7 @@ def test_get_taxes_for_order(
 
     # then
     payload = EventPayload.objects.get()
-    assert payload.payload == generate_order_payload_without_taxes(order)
+    assert payload.payload == generate_order_payload_for_tax_calculation(order)
     delivery = EventDelivery.objects.get()
     assert delivery.status == EventDeliveryStatus.PENDING
     assert delivery.event_type == WebhookEventSyncType.ORDER_CALCULATE_TAXES

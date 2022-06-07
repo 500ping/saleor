@@ -24,7 +24,7 @@ from ...webhook.payloads import (
     generate_list_gateways_payload,
     generate_meta,
     generate_order_payload,
-    generate_order_payload_without_taxes,
+    generate_order_payload_for_tax_calculation,
     generate_page_payload,
     generate_payment_payload,
     generate_product_deleted_payload,
@@ -1115,7 +1115,6 @@ class WebhookPlugin(BasePlugin):
             lambda: generate_checkout_payload_for_tax_calculation(
                 checkout_info,
                 lines,
-                self.requestor,
             ),
             parse_tax_data,
         )
@@ -1125,7 +1124,7 @@ class WebhookPlugin(BasePlugin):
     ) -> Optional["TaxData"]:
         return trigger_all_webhooks_sync(
             WebhookEventSyncType.ORDER_CALCULATE_TAXES,
-            lambda: generate_order_payload_without_taxes(order, self.requestor),
+            lambda: generate_order_payload_for_tax_calculation(order),
             parse_tax_data,
         )
 
