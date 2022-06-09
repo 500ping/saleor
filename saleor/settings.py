@@ -239,6 +239,7 @@ INSTALLED_APPS = [
     "django_filters",
     "phonenumber_field",
     "custom",
+    "stock_notification",
 ]
 
 ENABLE_DJANGO_EXTENSIONS = get_bool_from_env("ENABLE_DJANGO_EXTENSIONS", False)

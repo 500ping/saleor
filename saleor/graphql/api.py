@@ -26,6 +26,7 @@ from .translations.schema import TranslationQueries
 from .warehouse.schema import StockQueries, WarehouseMutations, WarehouseQueries
 from .webhook.schema import WebhookMutations, WebhookQueries
 from custom.graphql.schema import CustomMutations, CustomQueries
+from stock_notification.graphql.schema import TransferRequestMutations, TransferRequestQueries
 
 API_PATH = SimpleLazyObject(lambda: reverse("api"))
 
@@ -53,6 +54,7 @@ class Query(
     WarehouseQueries,
     WebhookQueries,
     CustomQueries,
+    TransferRequestQueries,
 ):
     pass
 
@@ -80,6 +82,7 @@ class Mutation(
     WarehouseMutations,
     WebhookMutations,
     CustomMutations,
+    TransferRequestMutations,
 ):
     pass
 
