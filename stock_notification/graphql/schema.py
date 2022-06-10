@@ -18,10 +18,9 @@ class TransferRequestQueries(graphene.ObjectType):
         ),
     )
 
-    # transfer_requests = PrefetchingConnectionField(TransferRequest,
-    #                                                description="List of transfer request.")
     transfer_requests = FilterInputConnectionField(TransferRequest,
-                                                   description="List of transfer request.", filter=TransferRequestFilterInput())
+                                                   description="List of transfer request.",
+                                                   filter=TransferRequestFilterInput())
 
     def resolve_transfer_request(self, info, **kwargs):
         transfer_request_pk = kwargs.get("id")

@@ -1,6 +1,5 @@
 import django_filters
 from saleor.graphql.core.types import FilterInputObjectType
-from graphene_django.filter import GlobalIDMultipleChoiceFilter
 from .. import models
 
 
