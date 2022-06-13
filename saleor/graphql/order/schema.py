@@ -43,8 +43,10 @@ from .mutations.orders import (
     OrderUpdate,
     OrderUpdateShipping,
     OrderVoid,
+    ChangeOrderLineProduct,
 )
 from .resolvers import (
+    resolve_orders_with_new_variant,
     resolve_draft_orders,
     resolve_homepage_events,
     resolve_order,
@@ -94,6 +96,12 @@ class OrderQueries(graphene.ObjectType):
         filter=OrderDraftFilterInput(description="Filtering options for draft orders."),
         description="List of draft orders.",
     )
+    orders_with_new_variant = FilterInputConnectionField(
+        Order,
+        sort_by=OrderSortingInput(description="Sort draft orders."),
+        filter=OrderDraftFilterInput(description="Filtering options for draft orders."),
+        description="List of orders with new variants.",
+    )
     orders_total = graphene.Field(
         TaxedMoney,
         description="Return the total sales amount from a specific period.",
@@ -125,6 +133,10 @@ class OrderQueries(graphene.ObjectType):
     @permission_required(OrderPermissions.MANAGE_ORDERS)
     def resolve_draft_orders(self, info, **_kwargs):
         return resolve_draft_orders(info)
+
+    @permission_required(OrderPermissions.MANAGE_ORDERS)
+    def resolve_orders_with_new_variant(self, info, **_kwargs):
+        return resolve_orders_with_new_variant(info)
 
     @permission_required(OrderPermissions.MANAGE_ORDERS)
     def resolve_orders_total(self, info, period, channel=None, **_kwargs):
@@ -170,3 +182,5 @@ class OrderMutations(graphene.ObjectType):
     order_update_shipping = OrderUpdateShipping.Field()
     order_void = OrderVoid.Field()
     order_bulk_cancel = OrderBulkCancel.Field()
+
+    order_line_change_product = ChangeOrderLineProduct.Field()

@@ -913,3 +913,14 @@ def remove_discount_from_order_line(
             "tax_rate",
         ]
     )
+
+
+def change_order_line_product(order_line, new_variant):
+    order_line.origin_variant = order_line.variant
+    order_line.origin_product_sku = order_line.product_sku
+
+    order_line.variant = new_variant
+    order_line.product_sku = new_variant.sku
+
+    order_line.save()
+    return order_line

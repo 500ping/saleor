@@ -574,6 +574,19 @@ class ProductVariant(SortableModel, ModelWithMetadata):
         null=True,
     )
 
+    origin_variant = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name="clone_variants",
+        blank=True,
+        null=True
+    )
+    origin_sku = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
     objects = models.Manager.from_queryset(ProductVariantQueryset)()
     translated = TranslationProxy()
 

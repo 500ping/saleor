@@ -28,6 +28,7 @@ from ....order.utils import (
     get_valid_shipping_methods_for_order,
     recalculate_order,
     update_order_prices,
+    change_order_line_product,
 )
 from ....payment import PaymentError, TransactionKind, gateway
 from ....plugins.manager import PluginsManager
@@ -979,3 +980,36 @@ class OrderLineUpdate(EditableOrderValidationMixin, ModelMutation):
         response = super().success_response(instance)
         response.order = instance.order
         return response
+
+
+class ChangeOrderLineProductInput(graphene.InputObjectType):
+    product_variant_id = graphene.ID(
+        description='Product Variant ID.',
+        required=True
+    )
+
+
+class ChangeOrderLineProduct(ModelMutation):
+    order = graphene.Field(Order, description="Related order.")
+
+    class Arguments:
+        id = graphene.ID(description="ID of a custom update.", required=True)
+        input = ChangeOrderLineProductInput(
+            required=True,
+            description="Fields required to change order line product."
+        )
+
+    class Meta:
+        description = "Change order line product."
+        model = order_models.OrderLine
+        permissions = (OrderPermissions.MANAGE_ORDERS,)
+        error_type_class = OrderError
+        error_type_field = "order_errors"
+
+    @classmethod
+    def get_instance(cls, info, **data):
+        instance = super().get_instance(info, **data)
+        data = data.get('input')
+        new_variant = cls.get_node_or_error(info, data.product_variant_id)
+        instance = change_order_line_product(instance, new_variant)
+        return instance

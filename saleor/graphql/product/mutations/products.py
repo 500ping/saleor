@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils.text import slugify
+from graphql.error import GraphQLError
 
 from ....attribute import AttributeInputType, AttributeType
 from ....attribute import models as attribute_models
@@ -63,6 +64,10 @@ from ..utils import (
     get_draft_order_lines_data_for_variants,
     get_used_attribute_values_for_variant,
     get_used_variants_attribute_values,
+    clone_product_variant,
+)
+from saleor.warehouse.models import (
+    Stock as stockModel,
 )
 
 
@@ -1082,6 +1087,74 @@ class ProductVariantDelete(ModelDeleteMutation):
             variantassignments__variant_id=instance.id,
             attribute__input_type__in=AttributeInputType.TYPES_WITH_UNIQUE_VALUES,
         ).delete()
+
+
+class ProductVariantCloneInput(StockInput):
+    sku = graphene.String(description="Stock keeping unit.")
+
+
+class ProductVariantClone(ModelMutation):
+    class Arguments:
+        id = graphene.ID(
+            required=True, description="ID of a product variant to clone."
+        )
+        input = ProductVariantCloneInput(
+            required=True, description="Fields required to clone a product variant."
+        )
+
+    class Meta:
+        description = "Clone an existing variant for product."
+        model = models.ProductVariant
+        permissions = (ProductPermissions.MANAGE_PRODUCTS,)
+        error_type_class = ProductError
+        error_type_field = "product_errors"
+
+    @classmethod
+    def check_sku(cls, data):
+        sku = data.get('sku')
+        variant = models.ProductVariant.objects.filter(sku=sku).first()
+        # if variant:
+        #     raise GraphQLError(
+        #         "SKU has been used!!!"
+        #     )
+        return sku
+
+    @classmethod
+    def create_stock_for_variant(cls, info, variant, data):
+        warehouse = cls.get_node_or_error(
+            info,
+            data.get('warehouse'),
+        )
+        new_stock = stockModel(
+            product_variant=variant,
+            warehouse=warehouse,
+            quantity=data.get("quantity"),
+        )
+        new_stock.save()
+
+    @classmethod
+    def perform_mutation(cls, _root, info, **data):
+        source_variant = cls.get_instance(info, **data)
+        new_variant = clone_product_variant(source_variant)
+
+        data = data.get('input')
+        sku = cls.check_sku(data)
+        new_variant.sku = sku
+        new_variant.save()
+
+        new_variant.channel_listings.set(source_variant.channel_listings.all())
+
+        # Create stock for variant
+        cls.create_stock_for_variant(info, new_variant, data)
+
+        return cls.success_response(new_variant)
+
+    @classmethod
+    def success_response(cls, instance):
+        origin_variant = instance.origin_variant
+        instance = ChannelContext(node=instance, channel_slug=None)
+        instance.origin_variant = origin_variant
+        return super().success_response(instance)
 
 
 class ProductTypeInput(graphene.InputObjectType):

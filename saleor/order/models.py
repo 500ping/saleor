@@ -532,6 +532,20 @@ class OrderLine(models.Model):
 
     objects = models.Manager.from_queryset(OrderLineQueryset)()
 
+    # Store old variant and product_sku
+    origin_variant = models.ForeignKey(
+        "product.ProductVariant",
+        related_name="old_order_lines",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    origin_product_sku = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
     class Meta:
         ordering = ("pk",)
 

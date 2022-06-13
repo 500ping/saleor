@@ -1,5 +1,6 @@
 from collections import defaultdict, namedtuple
 from typing import TYPE_CHECKING, Dict, Iterable, List
+from copy import deepcopy
 
 import graphene
 from django.core.exceptions import ValidationError
@@ -104,3 +105,11 @@ def get_draft_order_lines_data_for_variants(
         order_pks.add(line.order_id)
 
     return DraftOrderLinesData(order_to_lines_mapping, line_pks, order_pks)
+
+
+def clone_product_variant(source_variant):
+    new_variant = deepcopy(source_variant)
+    new_variant.pk = None
+    new_variant.origin_variant = source_variant
+    new_variant.origin_sku = source_variant.sku
+    return new_variant

@@ -468,6 +468,8 @@ class OrderLine(CountableDjangoObjectType):
             "quantity_fulfilled",
             "tax_rate",
             "unit_discount_reason",
+            "origin_product_sku",
+            "origin_variant"
         ]
 
     @staticmethod
@@ -584,6 +586,12 @@ class OrderLine(CountableDjangoObjectType):
     )
     def resolve_allocations(root: models.OrderLine, info):
         return AllocationsByOrderLineIdLoader(info.context).load(root.id)
+
+    @staticmethod
+    def resolve_origin_variant(root, *_args):
+        if not root.origin_variant:
+            return None
+        return ChannelContext(node=root.origin_variant, channel_slug=None)
 
 
 class Order(CountableDjangoObjectType):

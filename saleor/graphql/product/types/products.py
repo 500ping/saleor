@@ -265,9 +265,16 @@ class ProductVariant(ChannelContextTypeWithMetadata, CountableDjangoObjectType):
         description = (
             "Represents a version of a product such as different size or color."
         )
-        only_fields = ["id", "name", "product", "sku", "track_inventory", "weight"]
+        only_fields = ["id", "name", "product", "sku", "track_inventory", "weight",
+                       "origin_sku", "origin_variant"]
         interfaces = [relay.Node, ObjectWithMetadata]
         model = models.ProductVariant
+
+    @staticmethod
+    def resolve_origin_variant(root, info):
+        if not root.node.origin_variant:
+            return None
+        return ChannelContext(node=root.node.origin_variant, channel_slug=None)
 
     @staticmethod
     def resolve_channel(root: ChannelContext[models.Product], info):

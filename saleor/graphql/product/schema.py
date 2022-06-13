@@ -86,6 +86,7 @@ from .mutations.products import (
     ProductVariantUpdate,
     VariantMediaAssign,
     VariantMediaUnassign,
+    ProductVariantClone,
 )
 from .resolvers import (
     resolve_categories,
@@ -458,3 +459,5 @@ class ProductMutations(graphene.ObjectType):
 
     variant_media_assign = VariantMediaAssign.Field()
     variant_media_unassign = VariantMediaUnassign.Field()
+
+    product_variant_clone = ProductVariantClone.Field()

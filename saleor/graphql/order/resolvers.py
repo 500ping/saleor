@@ -25,6 +25,14 @@ def resolve_draft_orders(_info, **_kwargs):
     return qs
 
 
+def resolve_orders_with_new_variant(_info, **_kwargs):
+    qs = models.Order.objects.filter(
+        lines__origin_variant__isnull=False,
+        lines__origin_product_sku__isnull=False,
+    )
+    return qs
+
+
 @traced_resolver
 def resolve_orders_total(_info, period, channel_slug):
     if channel_slug is None:
