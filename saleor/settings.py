@@ -240,6 +240,7 @@ INSTALLED_APPS = [
     "phonenumber_field",
     "custom",
     "stock_notification",
+    "preorder",
 ]
 
 ENABLE_DJANGO_EXTENSIONS = get_bool_from_env("ENABLE_DJANGO_EXTENSIONS", False)
